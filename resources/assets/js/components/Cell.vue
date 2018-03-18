@@ -2,6 +2,7 @@
     <div class="cell" 
         :class="classes.join(' ')"
         @contextmenu.prevent="flag"
+        @click="flip"
     >
         <template v-if="status === statuses.OPEN">
             <template v-if="isEmpty"></template>
@@ -33,7 +34,6 @@
                     CHECKED : 'checked'
                 },
                 status: 'facedown',
-                adjacentCells : [],
                 adjacentBombs : 0
             }
         },
@@ -56,25 +56,29 @@
                         this.statuses.FACEDOWN,
                         this.statuses.FLAGGED,
                     ];
+                } else if (this.status === this.statuses.OPEN) {
+                    this.classes = [this.status, 'invalidate'];
                 } else {
                     this.classes = [this.status];
                 }
             },
 
             flip() {
-                if ([this.statuses.FACEDOWN, this.statuses.CHECKED].includes(this.status)) {
-                    this.open();
+                if ([this.statuses.OPEN, this.statuses.FLAGGED].includes(this.status)) {
+                    console.log('cant flip');
+                    
+                    return;
+                }
+
+                if (this.isMine) {
+                    eventBus.$emit('gameOver');
+                } else {
+                    this.status = this.statuses.OPEN;
                 }
             },
 
             open() {
-                if (this.isMine) {
-                    this.addClass('is-mine');
-
-                    eventBus.$emit('gameOver');
-                } else {
-                    this.status = this.status.OPEN;
-                }
+               
             },
 
             flag() {
@@ -125,5 +129,9 @@
 
     .is-mine {
         color: red;
+    }
+
+    .invalidate {
+        pointer-events: none;
     }
 </style>

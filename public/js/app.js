@@ -47851,7 +47851,7 @@ exports = module.exports = __webpack_require__(12)(false);
 
 
 // module
-exports.push([module.i, "\n.cell {\n    width: 50px;\n    height: 50px;\n    margin: 2px;\n}\n.facedown {\n    background-color: lightskyblue;\n}\n.open {\n    background-color: lightyellow;\n}\n.flagged {\n    background-color: red;\n}\n.checked {\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    -webkit-box-pack: center;\n        -ms-flex-pack: center;\n            justify-content: center;\n    font-size: 200%;\n    font-weight: bolder;\n    text-shadow: 2px 2px rgba(52, 58, 64, 0.5);\n    color: black;\n}\n.is-mine {\n    color: red;\n}\n", ""]);
+exports.push([module.i, "\n.cell {\n    width: 50px;\n    height: 50px;\n    margin: 2px;\n}\n.facedown {\n    background-color: lightskyblue;\n}\n.open {\n    background-color: lightyellow;\n}\n.flagged {\n    background-color: red;\n}\n.checked {\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    -webkit-box-pack: center;\n        -ms-flex-pack: center;\n            justify-content: center;\n    font-size: 200%;\n    font-weight: bolder;\n    text-shadow: 2px 2px rgba(52, 58, 64, 0.5);\n    color: black;\n}\n.is-mine {\n    color: red;\n}\n.invalidate {\n    pointer-events: none;\n}\n", ""]);
 
 // exports
 
@@ -47862,6 +47862,7 @@ exports.push([module.i, "\n.cell {\n    width: 50px;\n    height: 50px;\n    mar
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
 //
 //
 //
@@ -47897,7 +47898,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 CHECKED: 'checked'
             },
             status: 'facedown',
-            adjacentCells: [],
             adjacentBombs: 0
         };
     },
@@ -47915,24 +47915,26 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 this.classes = [this.statuses.FACEDOWN, this.statuses.CHECKED];
             } else if (this.status === this.statuses.FLAGGED) {
                 this.classes = [this.statuses.FACEDOWN, this.statuses.FLAGGED];
+            } else if (this.status === this.statuses.OPEN) {
+                this.classes = [this.status, 'invalidate'];
             } else {
                 this.classes = [this.status];
             }
         },
         flip: function flip() {
-            if ([this.statuses.FACEDOWN, this.statuses.CHECKED].includes(this.status)) {
-                this.open();
-            }
-        },
-        open: function open() {
-            if (this.isMine) {
-                this.addClass('is-mine');
+            if ([this.statuses.OPEN, this.statuses.FLAGGED].includes(this.status)) {
+                console.log('cant flip');
 
+                return;
+            }
+
+            if (this.isMine) {
                 eventBus.$emit('gameOver');
             } else {
-                this.status = this.status.OPEN;
+                this.status = this.statuses.OPEN;
             }
         },
+        open: function open() {},
         flag: function flag() {
             if (this.status == this.status.OPEN) {
                 return;
@@ -47966,7 +47968,8 @@ var render = function() {
         contextmenu: function($event) {
           $event.preventDefault()
           return _vm.flag($event)
-        }
+        },
+        click: _vm.flip
       }
     },
     [
