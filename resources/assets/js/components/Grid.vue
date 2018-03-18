@@ -13,8 +13,8 @@
         data() {
             return {
                 rows: 10,
-                columns: 9,
-                mines: 18,
+                columns: 10,
+                mines: 20,
                 cells : [],
                 hasRemainingCells : true
             }
