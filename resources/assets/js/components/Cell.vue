@@ -5,12 +5,12 @@
         @click="flip"
     >
         <template v-if="status === statuses.OPEN">
-            <template v-if="isEmpty"></template>
+            <template v-if="this.item.isEmpty"></template>
 
-            <template v-else-if="isMine"> * </template>
+            <template v-else-if="this.item.isMine"> * </template>
 
-            <template v-else-if="adjacentBombs != 0">
-                {{ adjacentBombs }}
+            <template v-else-if="this.item.adjacentMines != 0">
+                {{ this.item.adjacentMines }}
             </template>
         </template>   
 
@@ -22,10 +22,15 @@
 
 <script>
     export default {
+        props : {
+            item: {
+                type: Object,
+                required: true
+            },
+        },
+
         data() {
             return {
-                isMine: false,
-                isEmpty: false, 
                 classes: ['facedown'],
                 statuses: {
                     FACEDOWN: 'facedown',
@@ -33,8 +38,7 @@
                     FLAGGED : 'flagged',
                     CHECKED : 'checked'
                 },
-                status: 'facedown',
-                adjacentBombs : 0
+                status: this.item.status,
             }
         },
 
@@ -70,16 +74,13 @@
                     return;
                 }
 
-                if (this.isMine) {
+                if (this.item.isMine) {
                     eventBus.$emit('gameOver');
                 } else {
                     this.status = this.statuses.OPEN;
                 }
             },
 
-            open() {
-               
-            },
 
             flag() {
                 if (this.status == this.status.OPEN) {

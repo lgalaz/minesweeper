@@ -1,7 +1,9 @@
 <template>
     <div class="grid">
-        <div class="row" v-for="row in rows">
-            <cell v-for="column in columns"></cell>
+        <div class="row" v-for="row in this.grid">
+            <template v-for="column in row">
+                <cell :item="column"></cell>
+            </template>
         </div>
     </div>
 </template>
@@ -15,7 +17,7 @@
                 rows: 10,
                 columns: 10,
                 mines: 20,
-                cells : [],
+                grid : [],
                 hasRemainingCells : true
             }
         },
@@ -24,31 +26,85 @@
             Cell
         },
 
-        watch: {
-            cells() {
-                this.hasRemainingCells = true;
-            }
+        created() {
+            this.createGrid();
+
+            // this.grid.forEach((cell) => { 
+            //     this.setAdjacentCells(cell);
+            // });
         },
 
         methods: {
-            startNewGame() {
-
-            },
-
             createGrid() {
+                for (let x = 0; x < this.rows; x++) {
+                    let row = [];
 
+                    for (let y = 0; y < this.columns; y++) {
+                        let cell = this.createCell(x, y);
+
+                        row.push(cell);
+                    }
+
+                    this.grid.push(row);
+                }
+
+                return this;
             },
 
-            flipCell() {
-
+            createCell(row, column) {
+                return {
+                    row,
+                    column,
+                    isMine : false,
+                    isEmpty : false,
+                    adjacentcells : [],
+                    adjacentMines:  0,
+                    status : 'facedown',
+                };
             },
 
-            isCellInGrid() {
+            setRandomMines() {
+                for (let i = 0; i < mines; i++) {
+                    let randomRow = Math.floor(Math.random() * this.rows);
+                    let randomColumn = Math.floor(Math.random() * this.columns);
 
+                    if (this.isCellOnGrid({randomRow, randomColumn})) {
+                        let candidateCell = this.grid[randomRow][randomColumn];
+
+                        if (! candidateCell.isMine) {
+                            candidateCell.isMine = true;
+                        }
+                    }
+                }
+
+                return this;
+            }, 
+
+            
+
+            isCellOnGrid(x, y) {
+                return x < 0 || x >= rows ||
+                    y < 0 || y >= columns;
             },
 
-            getAdjacentCells(row, column) {
-                
+            setAdjacentCells(cell) {                
+                [
+                    {row : -1, column : -1}, 
+                    {row : -1, column : 0}, 
+                    {row : 1, column : 1}
+                ].forEach( (coord) => {
+                    if (isCellOnGrid(coord.row + cell.row, coord.column + cell.column))  {
+                        let neighborCell = this.grid[cell.row][cell.column];
+
+                        adjacentCells.push(neighborCell);
+
+                        if (neighborCell.isMine) {
+                            adjacentMines++;
+                        }
+                    }
+                })
+
+                return adjacentCells;
             } 
         }
     }

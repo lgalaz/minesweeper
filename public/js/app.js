@@ -47731,6 +47731,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 
 
@@ -47740,7 +47742,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             rows: 10,
             columns: 10,
             mines: 20,
-            cells: [],
+            grid: [],
             hasRemainingCells: true
         };
     },
@@ -47750,18 +47752,78 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         Cell: __WEBPACK_IMPORTED_MODULE_0__cell_vue___default.a
     },
 
-    watch: {
-        cells: function cells() {
-            this.hasRemainingCells = true;
-        }
+    created: function created() {
+        this.createGrid();
+
+        // this.grid.forEach((cell) => { 
+        //     this.setAdjacentCells(cell);
+        // });
     },
 
+
     methods: {
-        startNewGame: function startNewGame() {},
-        createGrid: function createGrid() {},
-        flipCell: function flipCell() {},
-        isCellInGrid: function isCellInGrid() {},
-        getAdjacentCells: function getAdjacentCells(row, column) {}
+        createGrid: function createGrid() {
+            for (var x = 0; x < this.rows; x++) {
+                var row = [];
+
+                for (var y = 0; y < this.columns; y++) {
+                    var cell = this.createCell(x, y);
+
+                    row.push(cell);
+                }
+
+                this.grid.push(row);
+            }
+
+            return this;
+        },
+        createCell: function createCell(row, column) {
+            return {
+                row: row,
+                column: column,
+                isMine: false,
+                isEmpty: false,
+                adjacentcells: [],
+                adjacentMines: 0,
+                status: 'facedown'
+            };
+        },
+        setRandomMines: function setRandomMines() {
+            for (var i = 0; i < mines; i++) {
+                var randomRow = Math.floor(Math.random() * this.rows);
+                var randomColumn = Math.floor(Math.random() * this.columns);
+
+                if (this.isCellOnGrid({ randomRow: randomRow, randomColumn: randomColumn })) {
+                    var candidateCell = this.grid[randomRow][randomColumn];
+
+                    if (!candidateCell.isMine) {
+                        candidateCell.isMine = true;
+                    }
+                }
+            }
+
+            return this;
+        },
+        isCellOnGrid: function isCellOnGrid(x, y) {
+            return x < 0 || x >= rows || y < 0 || y >= columns;
+        },
+        setAdjacentCells: function setAdjacentCells(cell) {
+            var _this = this;
+
+            [{ row: -1, column: -1 }, { row: -1, column: 0 }, { row: 1, column: 1 }].forEach(function (coord) {
+                if (isCellOnGrid(coord.row + cell.row, coord.column + cell.column)) {
+                    var neighborCell = _this.grid[cell.row][cell.column];
+
+                    adjacentCells.push(neighborCell);
+
+                    if (neighborCell.isMine) {
+                        adjacentMines++;
+                    }
+                }
+            });
+
+            return adjacentCells;
+        }
     }
 });
 
@@ -47886,10 +47948,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+    props: {
+        item: {
+            type: Object,
+            required: true
+        }
+    },
+
     data: function data() {
         return {
-            isMine: false,
-            isEmpty: false,
             classes: ['facedown'],
             statuses: {
                 FACEDOWN: 'facedown',
@@ -47897,8 +47964,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 FLAGGED: 'flagged',
                 CHECKED: 'checked'
             },
-            status: 'facedown',
-            adjacentBombs: 0
+            status: this.item.status
         };
     },
 
@@ -47928,13 +47994,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 return;
             }
 
-            if (this.isMine) {
+            if (this.item.isMine) {
                 eventBus.$emit('gameOver');
             } else {
                 this.status = this.statuses.OPEN;
             }
         },
-        open: function open() {},
         flag: function flag() {
             if (this.status == this.status.OPEN) {
                 return;
@@ -47975,15 +48040,15 @@ var render = function() {
     [
       _vm.status === _vm.statuses.OPEN
         ? [
-            _vm.isEmpty
+            this.item.isEmpty
               ? void 0
-              : _vm.isMine
+              : this.item.isMine
                 ? [_vm._v(" * ")]
-                : _vm.adjacentBombs != 0
+                : this.item.adjacentMines != 0
                   ? [
                       _vm._v(
                         "\n            " +
-                          _vm._s(_vm.adjacentBombs) +
+                          _vm._s(this.item.adjacentMines) +
                           "\n        "
                       )
                     ]
@@ -48017,13 +48082,16 @@ var render = function() {
   return _c(
     "div",
     { staticClass: "grid" },
-    _vm._l(_vm.rows, function(row) {
+    _vm._l(this.grid, function(row) {
       return _c(
         "div",
         { staticClass: "row" },
-        _vm._l(_vm.columns, function(column) {
-          return _c("cell")
-        })
+        [
+          _vm._l(row, function(column) {
+            return [_c("cell", { attrs: { item: column } })]
+          })
+        ],
+        2
       )
     })
   )
