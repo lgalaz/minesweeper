@@ -15,11 +15,11 @@
     export default {
         data() {
             return {
-                rows: 2,
-                columns: 2,
-                mines: 1,
+                rows: 8,
+                columns: 8,
+                mines: 8,
                 grid : [],
-                hasRemainingCells : true
+                remainingCells : 0
             }
         },
 
@@ -30,11 +30,34 @@
         created() {
             let self = this;
 
-            this.createGrid().setRandomMines().setAdjacentCells();
-
-            EventBus.$on('gameOver', function () {
+            EventBus.$on('mineFound', () => {
                 self.flipAll();
+
+                EventBus.$emit('gameLost');
             });
+
+            EventBus.$on('newGame', () => {
+                self.grid = [];
+
+                self.createGrid().setRandomMines().setAdjacentCells();
+            });
+
+            EventBus.$on('flippedCell', (cell) => {
+                this.remainingCells--;
+
+                if (cell.isEmpty) {
+                    self.flipNeighbours(cell);
+                }
+            });
+        },
+
+        watch: {
+            remainingCells(newValue) {
+                if (newValue === 0) {
+                    console.log('emmiting won');
+                    EventBus.$emit('gameWon');
+                }
+            }
         },
 
         methods: {
@@ -51,6 +74,8 @@
                     this.grid.push(row);
                 }
 
+                this.remainingCells = this.rows * this.columns - this.mines;
+
                 return this;
             },
 
@@ -59,6 +84,8 @@
                     row,
                     column,
                     isMine : false,
+                    isEmpty : false,
+                    isLocked : false,
                     adjacentCells : [],
                     adjacentMines:  0,
                     status : 'facedown',
@@ -66,7 +93,9 @@
             },
 
             setRandomMines() {
-                for (let i = 0; i < this.mines; i++) {
+                let remainingMines = this.mines;
+
+                while (remainingMines > 0) {
                     let randomRow = Math.floor(Math.random() * this.rows);
                     let randomColumn = Math.floor(Math.random() * this.columns);
 
@@ -74,8 +103,10 @@
                         let candidateCell = this.grid[randomRow][randomColumn];
 
                         if (! candidateCell.isMine) {
-                            console.log('setting mine');
                             candidateCell.isMine = true;
+
+                            remainingMines--;
+                            console.log('setmine', candidateCell);
                         }
                     }
                 }
@@ -116,6 +147,8 @@
                                 }
                             }
                         })
+
+                        cell.isEmpty = cell.isMine === false && cell.adjacentMines === 0;
                     });
                 });       
 
@@ -128,6 +161,24 @@
                         cell.status = "open";
                     });
                 });       
+            },
+
+            flipNeighbours(cell) {
+                cell.isLocked = true;
+
+                cell.adjacentCells.forEach((neighbour) => {
+                    if (neighbour.status !== "open") {
+                        neighbour.status = "open";
+
+                        this.remainingCells--;
+                    }
+                });
+
+                cell.adjacentCells.forEach((neighbour) => {
+                    if (! neighbour.isLocked && neighbour.isEmpty) {
+                        this.flipNeighbours(neighbour);
+                    }
+                });
             }
         }
     }

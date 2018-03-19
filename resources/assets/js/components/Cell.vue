@@ -5,9 +5,9 @@
         @click="flip"
     >
         <template v-if="item.status === statuses.OPEN">
-            <template v-if="isEmpty"></template>
+            <template v-if="item.isEmpty"></template>
 
-            <template v-else-if="item.adjacentMines != 0">
+            <template v-else-if="! item.isMine && item.adjacentMines != 0">
                 {{ item.adjacentMines }}
             </template>
 
@@ -44,10 +44,6 @@
         },
 
         computed: {
-            isEmpty() {
-                return ! this.item.isMine && this.item.adjacentMines === 0;
-            },
-
             status() {
                 return this.item.status;
             }
@@ -75,19 +71,17 @@
 
         methods: {
             flip() {
-                if ([this.statuses.OPEN, this.statuses.FLAGGED].includes(this.item.status)) {
-                    console.log('cant flip');
-                    
+                if ([this.statuses.OPEN, this.statuses.FLAGGED].includes(this.item.status)) {                    
                     return;
                 }
 
                 this.item.status = this.statuses.OPEN;
 
                 if (this.item.isMine) {
-                    EventBus.$emit('gameOver');
-
-                    console.log('emmiting');
-                } 
+                    EventBus.$emit('mineFound');
+                } else {
+                    EventBus.$emit('flippedCell', this.item);
+                }
             },
 
             flag() {
