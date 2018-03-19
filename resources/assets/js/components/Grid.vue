@@ -9,7 +9,7 @@
 </template>
 
 <script>
-    import Cell from './cell.vue';
+    import Cell from './Cell.vue';
     import EventBus from './eventBus.js';
 
     export default {

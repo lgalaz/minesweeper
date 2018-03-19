@@ -9,7 +9,7 @@
 </template>
 
 <script>
-    import Grid from './grid.vue';
+    import Grid from './Grid.vue';
     import EventBus from './eventBus.js';
 
     export default {
