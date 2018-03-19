@@ -47739,9 +47739,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony default export */ __webpack_exports__["default"] = ({
     data: function data() {
         return {
-            rows: 10,
-            columns: 10,
-            mines: 20,
+            rows: 3,
+            columns: 3,
+            mines: 4,
             grid: [],
             hasRemainingCells: true
         };
@@ -47753,7 +47753,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
 
     created: function created() {
-        this.createGrid();
+        this.createGrid().setRandomMines();
 
         // this.grid.forEach((cell) => { 
         //     this.setAdjacentCells(cell);
@@ -47789,11 +47789,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             };
         },
         setRandomMines: function setRandomMines() {
-            for (var i = 0; i < mines; i++) {
+            for (var i = 0; i < this.mines; i++) {
                 var randomRow = Math.floor(Math.random() * this.rows);
                 var randomColumn = Math.floor(Math.random() * this.columns);
 
-                if (this.isCellOnGrid({ randomRow: randomRow, randomColumn: randomColumn })) {
+                if (this.isCellOnGrid(randomRow, randomColumn)) {
+                    console.log('was on grid');
                     var candidateCell = this.grid[randomRow][randomColumn];
 
                     if (!candidateCell.isMine) {
@@ -47805,7 +47806,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             return this;
         },
         isCellOnGrid: function isCellOnGrid(x, y) {
-            return x < 0 || x >= rows || y < 0 || y >= columns;
+            console.log(' ' + x + ', ' + y + ' ');
+            return x >= 0 || x < this.rows || y >= 0 || y < this.columns;
         },
         setAdjacentCells: function setAdjacentCells(cell) {
             var _this = this;

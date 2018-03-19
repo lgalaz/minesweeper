@@ -14,9 +14,9 @@
     export default {
         data() {
             return {
-                rows: 10,
-                columns: 10,
-                mines: 20,
+                rows: 3,
+                columns: 3,
+                mines: 4,
                 grid : [],
                 hasRemainingCells : true
             }
@@ -27,7 +27,7 @@
         },
 
         created() {
-            this.createGrid();
+            this.createGrid().setRandomMines();
 
             // this.grid.forEach((cell) => { 
             //     this.setAdjacentCells(cell);
@@ -64,11 +64,12 @@
             },
 
             setRandomMines() {
-                for (let i = 0; i < mines; i++) {
+                for (let i = 0; i < this.mines; i++) {
                     let randomRow = Math.floor(Math.random() * this.rows);
                     let randomColumn = Math.floor(Math.random() * this.columns);
 
-                    if (this.isCellOnGrid({randomRow, randomColumn})) {
+                    if (this.isCellOnGrid(randomRow, randomColumn)) {
+                        console.log('was on grid');
                         let candidateCell = this.grid[randomRow][randomColumn];
 
                         if (! candidateCell.isMine) {
@@ -80,11 +81,10 @@
                 return this;
             }, 
 
-            
-
             isCellOnGrid(x, y) {
-                return x < 0 || x >= rows ||
-                    y < 0 || y >= columns;
+                console.log(` ${x}, ${y} `);
+                return x >= 0 || x < this.rows ||
+                    y >= 0 || y < this.columns;
             },
 
             setAdjacentCells(cell) {                
