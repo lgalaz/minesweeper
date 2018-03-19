@@ -20,5 +20,3 @@ Vue.component('minesweeper', require('./components/Minesweeper.vue'));
 const app = new Vue({
     el: '#app'
 });
-
-const eventBus = new Vue();

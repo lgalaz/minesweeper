@@ -10,6 +10,7 @@
 
 <script>
     import Cell from './cell.vue';
+    import EventBus from './eventBus.js';
 
     export default {
         data() {
@@ -27,7 +28,13 @@
         },
 
         created() {
+            let self = this;
+
             this.createGrid().setRandomMines().setAdjacentCells();
+
+            EventBus.$on('gameOver', function () {
+                self.flipAll();
+            });
         },
 
         methods: {
@@ -113,7 +120,15 @@
                 });       
 
                 return this;
-            } 
+            }, 
+
+            flipAll() {
+                  this.grid.forEach((row) => { 
+                    row.forEach((cell) => {
+                        cell.status = "open";
+                    });
+                });       
+            }
         }
     }
 </script>

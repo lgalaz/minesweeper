@@ -4,23 +4,25 @@
         @contextmenu.prevent="flag"
         @click="flip"
     >
-        <template v-if="status === statuses.OPEN">
-            <template v-if="this.isEmpty"></template>
+        <template v-if="item.status === statuses.OPEN">
+            <template v-if="isEmpty"></template>
 
-            <template v-else-if="this.item.isMine"> * </template>
+            <template v-else-if="item.adjacentMines != 0">
+                {{ item.adjacentMines }}
+            </template>
 
-            <template v-else-if="this.item.adjacentMines != 0">
-                {{ this.item.adjacentMines }}
+            <template v-else-if="item.isMine">
+                <span class="is-mine"> * ! </span>
             </template>
         </template>   
 
-        <template v-else-if="status === statuses.CHECKED">
-            ?
-        </template>
+        <template v-else-if="item.status === statuses.CHECKED"> ? </template>
     </div>
 </template>
 
 <script>
+    import EventBus from './eventBus.js';
+
     export default {
         props : {
             item: {
@@ -37,68 +39,68 @@
                     OPEN : 'open',
                     FLAGGED : 'flagged',
                     CHECKED : 'checked'
-                },
-                status: this.item.status,
+                }
             }
         },
 
         computed: {
             isEmpty() {
                 return ! this.item.isMine && this.item.adjacentMines === 0;
+            },
+
+            status() {
+                return this.item.status;
             }
         },
 
         watch: {
-            status() {
-                this.setClasses(this.status);
-            }
-        },
-
-        methods: {
-            setClasses(status) {
-                if (this.status === this.statuses.CHECKED) {
+            status(newStatus, oldStatus) {
+                if (newStatus === this.statuses.CHECKED) {
                     this.classes = [
                         this.statuses.FACEDOWN,
                         this.statuses.CHECKED,
                     ];
-                } else if (this.status === this.statuses.FLAGGED) {
+                } else if (newStatus === this.statuses.FLAGGED) {
                     this.classes = [
                         this.statuses.FACEDOWN,
                         this.statuses.FLAGGED,
                     ];
-                } else if (this.status === this.statuses.OPEN) {
-                    this.classes = [this.status, 'invalidate'];
+                } else if (newStatus === this.statuses.OPEN) {
+                    this.classes = [this.statuses.OPEN, 'invalidate'];
                 } else {
-                    this.classes = [this.status];
+                    this.classes = [this.statuses.FACEDOWN];
                 }
-            },
+            }
+        },
 
+        methods: {
             flip() {
-                if ([this.statuses.OPEN, this.statuses.FLAGGED].includes(this.status)) {
+                if ([this.statuses.OPEN, this.statuses.FLAGGED].includes(this.item.status)) {
                     console.log('cant flip');
                     
                     return;
                 }
 
+                this.item.status = this.statuses.OPEN;
+
                 if (this.item.isMine) {
-                    eventBus.$emit('gameOver');
-                } else {
-                    this.status = this.statuses.OPEN;
-                }
+                    EventBus.$emit('gameOver');
+
+                    console.log('emmiting');
+                } 
             },
 
-
             flag() {
-                if (this.status == this.status.OPEN) {
+                if (this.item.status == this.statuses.OPEN) {
                     return;
                 }
 
-                if (this.status === this.statuses.FACEDOWN) {
-                    this.status = this.statuses.CHECKED
-                } else if (this.status === this.statuses.CHECKED) {
-                    this.status = this.statuses.FLAGGED
+                if (this.item.status === this.statuses.FACEDOWN) {
+                    this.item.status = this.statuses.CHECKED
+                } else if (this.item.status === this.statuses.CHECKED) {
+                    this.item.status = this.statuses.FLAGGED
                 } else {
-                    this.status = this.statuses.FACEDOWN;
+                    this.item.status = this.statuses.FACEDOWN;
                 }
             }
         }
@@ -110,6 +112,12 @@
         width: 50px;
         height: 50px;
         margin: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 200%;
+        font-weight: bolder;
+        text-shadow: 2px 2px rgba(52, 58, 64, 0.5);
     }
 
     .facedown {
@@ -125,12 +133,6 @@
     }
 
     .checked {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 200%;
-        font-weight: bolder;
-        text-shadow: 2px 2px rgba(52, 58, 64, 0.5);
         color: black;
     }
 
