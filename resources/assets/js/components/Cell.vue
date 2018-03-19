@@ -5,7 +5,7 @@
         @click="flip"
     >
         <template v-if="status === statuses.OPEN">
-            <template v-if="this.item.isEmpty"></template>
+            <template v-if="this.isEmpty"></template>
 
             <template v-else-if="this.item.isMine"> * </template>
 
@@ -39,6 +39,12 @@
                     CHECKED : 'checked'
                 },
                 status: this.item.status,
+            }
+        },
+
+        computed: {
+            isEmpty() {
+                return ! this.item.isMine && this.item.adjacentMines === 0;
             }
         },
 

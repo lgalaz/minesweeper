@@ -14,9 +14,9 @@
     export default {
         data() {
             return {
-                rows: 3,
-                columns: 3,
-                mines: 4,
+                rows: 2,
+                columns: 2,
+                mines: 1,
                 grid : [],
                 hasRemainingCells : true
             }
@@ -27,11 +27,7 @@
         },
 
         created() {
-            this.createGrid().setRandomMines();
-
-            // this.grid.forEach((cell) => { 
-            //     this.setAdjacentCells(cell);
-            // });
+            this.createGrid().setRandomMines().setAdjacentCells();
         },
 
         methods: {
@@ -56,8 +52,7 @@
                     row,
                     column,
                     isMine : false,
-                    isEmpty : false,
-                    adjacentcells : [],
+                    adjacentCells : [],
                     adjacentMines:  0,
                     status : 'facedown',
                 };
@@ -69,10 +64,10 @@
                     let randomColumn = Math.floor(Math.random() * this.columns);
 
                     if (this.isCellOnGrid(randomRow, randomColumn)) {
-                        console.log('was on grid');
                         let candidateCell = this.grid[randomRow][randomColumn];
 
                         if (! candidateCell.isMine) {
+                            console.log('setting mine');
                             candidateCell.isMine = true;
                         }
                     }
@@ -82,29 +77,42 @@
             }, 
 
             isCellOnGrid(x, y) {
-                console.log(` ${x}, ${y} `);
-                return x >= 0 || x < this.rows ||
-                    y >= 0 || y < this.columns;
+                return x >= 0 && x < this.rows &&
+                    y >= 0 && y < this.columns;
             },
 
-            setAdjacentCells(cell) {                
-                [
+            setAdjacentCells(cell) {     
+                let borderCoords =  [
                     {row : -1, column : -1}, 
                     {row : -1, column : 0}, 
+                    {row : -1, column : 1},
+                    {row : 0, column : -1},
+                    {row : 0, column : 1},
+                    {row : 1, column : -1},
+                    {row : 1, column : 0},
                     {row : 1, column : 1}
-                ].forEach( (coord) => {
-                    if (isCellOnGrid(coord.row + cell.row, coord.column + cell.column))  {
-                        let neighborCell = this.grid[cell.row][cell.column];
+                ]
 
-                        adjacentCells.push(neighborCell);
+                this.grid.forEach((row) => { 
+                    row.forEach((cell) => {
+                        borderCoords.forEach((coord) => {
+                            let neighborRow = coord.row + cell.row;
+                            let neighborColumn = coord.column + cell.column;
 
-                        if (neighborCell.isMine) {
-                            adjacentMines++;
-                        }
-                    }
-                })
+                            if (this.isCellOnGrid(neighborRow, neighborColumn))  {
+                                let neighborCell = this.grid[neighborRow][neighborColumn];
 
-                return adjacentCells;
+                                cell.adjacentCells.push(neighborCell);
+
+                                if (neighborCell.isMine) {
+                                    cell.adjacentMines++;
+                                }
+                            }
+                        })
+                    });
+                });       
+
+                return this;
             } 
         }
     }

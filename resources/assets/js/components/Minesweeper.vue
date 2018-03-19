@@ -10,10 +10,6 @@
     export default {
         components: {
             Grid
-        },
-
-        mounted() {
-            console.log('Component mounted.')
         }
     }
 </script>
