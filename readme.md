@@ -19,6 +19,8 @@ Begin by cloning this repository to your machine, and installing all Composer & 
 ```bash
 git clone git@github.com:lgalaz/minesweeper.git
 cd vuejs-minesweeper && composer install && npm install
+cp .env.example 
+php artisan key:generate
 npm run dev
 ```
 
@@ -28,3 +30,8 @@ npm run dev
 
 Next, boot up a server and visit your forum. 
 If using a tool like Laravel Valet, the URL will default to `http://vuejs-minesweeper.test`. 
+
+
+## Demo
+
+http://104.236.111.126/
